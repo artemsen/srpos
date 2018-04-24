@@ -1,0 +1,33 @@
+TARGET_x86 = libsrpos2286_plugin.dll
+TARGET_x64 = libsrpos2264_plugin.dll
+DEPEND_NME = libvlccore
+DEPEND_LIB = $(DEPEND_NME).dll
+DEPEND_DEF = $(DEPEND_NME).def
+BLD_OPT    = srpos.c -Wall -shared -static-libgcc -DLIBVLC_USE_PTHREAD_CANCEL -D__PLUGIN__ -DMODULE_STRING=\"srpos\" -I./vlc_2.2_include -L. -lvlccore
+
+all: $(TARGET_x86) $(TARGET_x64)
+
+clean:
+	rm -f $(TARGET_x86) $(TARGET_x64)
+
+$(TARGET_x86): $(DEPEND_DEF)
+	i686-w64-mingw32-dlltool -l $(DEPEND_LIB) -d $(DEPEND_DEF)
+	i686-w64-mingw32-g++ $(BLD_OPT) -o $(TARGET_x86)
+	i686-w64-mingw32-strip $(TARGET_x86)
+	
+$(TARGET_x64): $(DEPEND_DEF)
+	x86_64-w64-mingw32-dlltool -l $(DEPEND_LIB) -d $(DEPEND_DEF)
+	x86_64-w64-mingw32-g++ $(BLD_OPT) -o $(TARGET_x64)
+	x86_64-w64-mingw32-strip $(TARGET_x64)
+
+$(DEPEND_DEF):
+	echo "LIBRARY \"$(DEPEND_LIB)\"" > $(DEPEND_DEF)
+	echo "EXPORTS" >> $(DEPEND_DEF)
+	echo "var_AddCallback" >> $(DEPEND_DEF)
+	echo "var_DelCallback" >> $(DEPEND_DEF)
+	echo "input_GetItem" >> $(DEPEND_DEF)
+	echo "input_Control" >> $(DEPEND_DEF)
+	echo "playlist_Unlock" >> $(DEPEND_DEF)
+	echo "playlist_CurrentInput" >> $(DEPEND_DEF)
+	echo "vlc_object_release" >> $(DEPEND_DEF)
+	echo "config_GetUserDir" >> $(DEPEND_DEF)
